@@ -202,19 +202,28 @@ const allEntries = [];
 
 window.onload = () => {
   const dateInput = document.getElementById("pickupDate");
-  const now = new Date();
-  const today = now.toISOString().slice(0, 10);
+  const today = new Date().toISOString().slice(0, 10);
+  if (!dateInput.value) dateInput.value = today;
+  handleTareChange();
+  restoreFromLocalStorage();
 
+  // 🕒 Автоматичне очищення щодня о 20:10
+  const now = new Date();
   const currentHour = now.getHours();
   const currentMinute = now.getMinutes();
+  const currentDate = now.toISOString().split('T')[0]; // yyyy-mm-dd
 
-  const lastClear = localStorage.getItem(storagePrefix + "lastClearDate");
+  const lastClearDate = localStorage.getItem(storagePrefix + "lastAutoClear");
 
-  // Якщо ще не очищалося сьогодні І вже після 20:10
-  if (
-    lastClear !== today &&
-    (currentHour > 20 || (currentHour === 20 && currentMinute >= 10))
-  ) {
+  iif (
+  (currentHour > 20 || (currentHour === 20 && currentMinute >= 20)) &&
+  lastClearDate !== currentDate
+) {
+
+    // Зберігаємо дату очищення
+    localStorage.setItem(storagePrefix + "lastAutoClear", currentDate);
+
+    // 🔥 Видаляємо локальні дані
     localStorage.removeItem(storagePrefix + "yagidEntries");
     localStorage.removeItem(storagePrefix + "totalWeight");
     localStorage.removeItem(storagePrefix + "totalSum");
@@ -222,16 +231,20 @@ window.onload = () => {
     localStorage.removeItem(storagePrefix + "berryPrices");
     localStorage.removeItem(storagePrefix + "berryBoxCounts");
     localStorage.removeItem(storagePrefix + "totalBoxesCount");
-    localStorage.setItem(storagePrefix + "lastClearDate", today);
 
-    location.reload();
-    return;
+    // 🔥 Видаляємо дані з Firebase
+    firebase.database().ref('points/point2').remove()
+      .then(() => {
+        console.log("Автоочищення Firebase завершено");
+        // 🔁 Перезавантажуємо сторінку
+        location.reload();
+      })
+      .catch((error) => {
+        console.error("Помилка автоочищення Firebase:", error);
+      });
   }
-
-  if (!dateInput.value) dateInput.value = today;
-  handleTareChange();
-  restoreFromLocalStorage();
 };
+
 
 
 function handleTareChange() {
