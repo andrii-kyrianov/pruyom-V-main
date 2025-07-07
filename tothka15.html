@@ -215,8 +215,8 @@ window.onload = () => {
 
   const lastClearDate = localStorage.getItem(storagePrefix + "lastAutoClear");
 
-  iif (
-  (currentHour > 20 || (currentHour === 20 && currentMinute >= 20)) &&
+  if (
+  (currentHour > 20 || (currentHour === 20 && currentMinute >= 30)) &&
   lastClearDate !== currentDate
 ) {
 
