@@ -202,11 +202,37 @@ const allEntries = [];
 
 window.onload = () => {
   const dateInput = document.getElementById("pickupDate");
-  const today = new Date().toISOString().slice(0, 10);
+  const now = new Date();
+  const today = now.toISOString().slice(0, 10);
+
+  const currentHour = now.getHours();
+  const currentMinute = now.getMinutes();
+
+  const lastClear = localStorage.getItem(storagePrefix + "lastClearDate");
+
+  // Якщо ще не очищалося сьогодні І вже після 20:10
+  if (
+    lastClear !== today &&
+    (currentHour > 20 || (currentHour === 20 && currentMinute >= 10))
+  ) {
+    localStorage.removeItem(storagePrefix + "yagidEntries");
+    localStorage.removeItem(storagePrefix + "totalWeight");
+    localStorage.removeItem(storagePrefix + "totalSum");
+    localStorage.removeItem(storagePrefix + "berryTotals");
+    localStorage.removeItem(storagePrefix + "berryPrices");
+    localStorage.removeItem(storagePrefix + "berryBoxCounts");
+    localStorage.removeItem(storagePrefix + "totalBoxesCount");
+    localStorage.setItem(storagePrefix + "lastClearDate", today);
+
+    location.reload();
+    return;
+  }
+
   if (!dateInput.value) dateInput.value = today;
   handleTareChange();
   restoreFromLocalStorage();
 };
+
 
 function handleTareChange() {
   const tareType = document.getElementById('tareType').value;
