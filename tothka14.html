@@ -206,6 +206,43 @@ window.onload = () => {
   if (!dateInput.value) dateInput.value = today;
   handleTareChange();
   restoreFromLocalStorage();
+
+  // 🕒 Автоматичне очищення щодня о 20:10
+  const now = new Date();
+  const currentHour = now.getHours();
+  const currentMinute = now.getMinutes();
+  const currentDate = now.toISOString().split('T')[0]; // yyyy-mm-dd
+
+  const lastClearDate = localStorage.getItem(storagePrefix + "lastAutoClear");
+
+  if (
+  (currentHour > 4 || (currentHour === 4 && currentMinute >= 0)) &&
+  lastClearDate !== currentDate
+) {
+
+    // Зберігаємо дату очищення
+    localStorage.setItem(storagePrefix + "lastAutoClear", currentDate);
+
+    // 🔥 Видаляємо локальні дані
+    localStorage.removeItem(storagePrefix + "yagidEntries");
+    localStorage.removeItem(storagePrefix + "totalWeight");
+    localStorage.removeItem(storagePrefix + "totalSum");
+    localStorage.removeItem(storagePrefix + "berryTotals");
+    localStorage.removeItem(storagePrefix + "berryPrices");
+    localStorage.removeItem(storagePrefix + "berryBoxCounts");
+    localStorage.removeItem(storagePrefix + "totalBoxesCount");
+
+    // 🔥 Видаляємо дані з Firebase
+    firebase.database().ref('points/point14').remove()
+      .then(() => {
+        console.log("Автоочищення Firebase завершено");
+        // 🔁 Перезавантажуємо сторінку
+        location.reload();
+      })
+      .catch((error) => {
+        console.error("Помилка автоочищення Firebase:", error);
+      });
+  }
 };
 
 function handleTareChange() {
