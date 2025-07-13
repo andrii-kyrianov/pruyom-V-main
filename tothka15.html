@@ -233,7 +233,7 @@ window.onload = () => {
     localStorage.removeItem(storagePrefix + "totalBoxesCount");
 
     // 🔥 Видаляємо дані з Firebase
-    firebase.database().ref('points/point2').remove()
+    firebase.database().ref('points/point15').remove()
       .then(() => {
         console.log("Автоочищення Firebase завершено");
         // 🔁 Перезавантажуємо сторінку
